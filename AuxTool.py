@@ -1,5 +1,6 @@
 import time
 
+
 # Self-defined rounding tool
 def rnd(num :float, N :int)->float:
     """
@@ -52,3 +53,24 @@ class Timer:
     
     def avg_time(self, iterations):
         return rnd(self.tot_time / iterations , 6)
+
+    
+def load_adjacency(filename):
+    from igraph import Graph as iGph
+    with open(filename,'r') as g:
+        lines = g.readlines()
+        lines = [x for x in lines if x!='\n']
+        G = []
+        A = []
+        for i in range(len(lines)):
+            if 'Graph' in lines[i]:
+                lines[i] = 'G'+lines[i][lines[i].index(' ')+1:lines[i].index(',')]
+                if i != 0:
+                    G.append(iGph.Adjacency(np.array(A)))
+                    A = []
+            else:
+                lines[i] = lines[i][0:lines[i].index('\n')]
+                A.append(list(map(int,lines[i].split(' '))))
+        G.append(iGph.Adjacency(np.array(A)))
+
+    return tuple(G)
