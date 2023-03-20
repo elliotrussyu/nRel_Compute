@@ -43,10 +43,8 @@ class GraphClass():
         if specify == 'intersection_point':
             if self.size >= 200:
                 if interact:
-                    warn = input("""
-Warning! There are too many graphs in the graph set, computation could cost very long time. 
-Randomly sampling 100 graphs in the graph set.
-To override this feature, press 'o' and confirm by pressing enter. Otherwise continue by pressing enter.""")
+                    print('Warning! There are too many graphs in the graph set, computation could cost very long time.\nRandomly sampling 100 graphs in the graph set.')
+                    warn = input("To override this feature, press 'o' and confirm by pressing enter. Otherwise continue by pressing enter.")
                     if warn != 'o':
                         processed_poly[specify] = tuple(np.array(processed_poly[specify],dtype=object)[rand.sample(range(0, self.size), 200)])
                         print('Successfully sampled {} graphs from the original graph set.'.format(len(processed_poly[specify])))
@@ -116,7 +114,6 @@ def polyarray_realroot_statistics(polyarray, rec=False):
     return count, tot
 
 
-
 def combi( N:int, num:int)->it.combinations:
     """
         Find all comibinations of 'num' elements for int in [0,N-1].
@@ -162,6 +159,7 @@ def examine_connected_sets(G: ig.Graph,f: int) -> int:
         if GG.is_connected() == True:
             c_N_minus_f += 1
     return c_N_minus_f
+
 
 def to_ig(H) -> ig.Graph:
     """
