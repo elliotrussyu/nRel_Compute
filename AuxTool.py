@@ -51,9 +51,10 @@ class Timer:
         # tot_time =  rndsd(end_time - start_time,6)
         # sec_decimals = tot_time % 1
     
-    def avg_time(self, iterations):
+    def avg_time(self, iterations = None):
+        if not iterations:
+            iterations = len(self.stamps)
         return rnd(self.tot_time / iterations , 6)
-
     
 def load_adjacency(filename):
     from igraph import Graph as iGph

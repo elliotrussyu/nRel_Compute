@@ -5,6 +5,117 @@ import igraph as ig
 import time 
 import math
 
+class GraphClass():
+    
+    def __init__(self, N, L):
+        self.N = N
+        self.L = L
+        self.attachedfile = None
+        self.Gset = None
+        self.size = None
+        self.Gpoly = None
+    
+    def attach(self, filename):
+        self.attachedfile = filename
+    
+    
+    def load(self, fname = None):
+        if not fname:
+            if self.attachedfile:
+                fname = self.attachedfile
+            else:
+                raise ValueError('Missing graph set file to load!')
+        self.Gset = load_adjacency(fname)
+        self.size = len(self.Gset)
+        self.Gcoeff = tuple([nRelpoly(g) for g in self.Gset])
+        self.Gpoly = tuple([coeff_to_poly(co) for co in self.Gcoeff])
+        
+    
+    def analysis(self, specify = 'all',rec = False, sh_report = False, interact = False, sample = True):
+        
+        processed_poly = {'extrema': tuple(map(np.polyder,self.Gpoly, it.repeat(1))),
+                         'inflection_point':tuple(map(np.polysub,self.Gpoly, it.repeat([1,0]))),
+                         'fixed_point':tuple(map(np.polysub,self.Gpoly, it.repeat([1,0]))),
+                         'intersection_point': self.Gpoly,
+                          'all': ('extrema','inflection_point','fixed_point','intersection_point')
+                         }
+        
+        if specify == 'intersection_point':
+            if self.size >= 200:
+                if interact:
+                    warn = input("""
+Warning! There are too many graphs in the graph set, computation could cost very long time. 
+Randomly sampling 100 graphs in the graph set.
+To override this feature, press 'o' and confirm by pressing enter. Otherwise continue by pressing enter.""")
+                    if warn != 'o':
+                        processed_poly[specify] = tuple(np.array(processed_poly[specify],dtype=object)[rand.sample(range(0, self.size), 200)])
+                        print('Successfully sampled {} graphs from the original graph set.'.format(len(processed_poly[specify])))
+                else:
+                    if sample:
+                        processed_poly[specify] = tuple(np.array(processed_poly[specify],dtype=object)[rand.sample(range(0, self.size), 200)])
+            pairs = tuple(combi(processed_poly[specify], 2))
+            if interact:
+                print('There are in total {} different graph pairs.'.format(len(pairs)))
+            processed_poly[specify] = tuple(map(np.polysub,[pair[0] for pair in pairs],[pair[1] for pair in pairs]))
+        
+        count_record = {}
+        value_record = {}
+        if specify == 'all':
+            for spec in processed_poly[specify]:
+                count, values = polyarray_realroot_statistics(processed_poly[spec], rec=False)
+                count_record[spec] = count
+                value_record[spec] = values
+        else:
+            count, tot = polyarray_realroot_statistics(processed_poly[spec], rec=False)
+            count_record[specify] = count
+            value_record[specify] = values
+        if sh_report:
+            pass
+            # report_gen('extrema',count)
+        if rec:
+            return count_record, value_record
+        else:
+            return count_record
+    
+    def plotALL(self, x = np.linspace(0,1,101)):
+        plt.figure()
+        plt.xlim([0,1])
+        plt.ylim([0,1])
+        for g in self.Gpoly:
+            plt.plot(x,g(x), pltpoly=True)
+        plt.show()
+
+
+def coeff_to_poly(coeff, pltpoly = False, x=np.linspace(0,1,101), plt_arg = None):
+    poly1 = np.poly1d(coeff)
+    if pltpoly:
+        plt.plot(x,poly1(x))
+    
+    return poly1
+
+
+def findrealroots(p, interval = (0.0001,0.9999)):
+    roots = p.r
+    realroots = roots.real[abs(roots.imag)<1e-5]
+    return realroots[np.where(np.logical_and(interval[0]<= realroots ,realroots<= interval[1]))]
+
+
+def polyarray_realroot_statistics(polyarray, rec=False):
+    count = {}
+    tot = {}
+
+    for i,p in enumerate(polyarray):
+        rr = findrealroots(p)
+        key = str(len(rr))
+        if key in count.keys():
+            count[key] += 1
+        else:
+            count[key] = 1
+        if rec:
+            tot[str(i)] = rr
+    return count, tot
+
+
 
 def combi( N:int, num:int)->it.combinations:
     """
