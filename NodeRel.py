@@ -4,6 +4,8 @@ import numpy as np
 import igraph as ig
 import time 
 import math
+import matplotlib.pyplot as plt
+from AuxTool import *
 
 class GraphClass():
     
@@ -149,16 +151,16 @@ def examine_connected_sets(G: ig.Graph,f: int) -> int:
         f    number of nodes to be removed
 
     Output:
-        c_n_minus_f   the cardinality of the k-ordered connected sets.
+        c_k   the cardinality of the k-ordered connected sets.
     """
     
-    c_N_minus_f = 0
-    for failed_vertice_set in combi(G.vcount(),f):
-        GG = G.copy()
-        GG.delete_vertices(failed_vertice_set)
-        if GG.is_connected() == True:
-            c_N_minus_f += 1
-    return c_N_minus_f
+    
+    k = G.vcount()-f
+    c_k = 0
+    for survived_vertice_set in combi(G.vcount(),k):
+        if G.induced_subgraph(survived_vertice_set).is_connected():
+            c_k += 1
+    return c_k
 
 
 def to_ig(H) -> ig.Graph:
@@ -244,3 +246,28 @@ def nRelpoly(H):
         coeff[k:] += np.array([c_k[k]*((-1)**i)*math.comb(N-k,i) for i in range(N-k+1)])
     
     return coeff[::-1]
+
+
+def eval_p(G,p,N,kappa,rounds):
+    connected_prob = 0
+    
+    # randmat = np.array([np.array([rand.random() for _ in range(N)]) for _ in range(int(rounds))])
+    for _ in range(int(rounds)):
+        randarr = np.random.rand(N)
+        good_nodes = np.where(randarr < p)[0]
+        # if 0 < len(good_nodes) <= N - kappa:
+        if G.induced_subgraph(good_nodes).is_connected():
+            connected_prob += 1
+        # elif len(good_nodes) > N - kappa:
+        #         connected_prob += 1
+
+    return connected_prob
+
+
+def CMC(H,rounds = 1e5,probability_seq = np.linspace(0,1,21),prec = 4):
+    G = to_ig(H)
+    kappa = G.cohesion()
+    N = G.vcount()
+    result = list(map(eval_p,[G]*len(probability_seq),probability_seq,it.repeat(N),it.repeat(kappa),it.repeat(rounds)))
+    # print(result)
+    return np.array([rnd(i/rounds,prec) for i in result])

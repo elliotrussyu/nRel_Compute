@@ -1,5 +1,5 @@
 import time
-
+import numpy as np
 
 # Self-defined rounding tool
 def rnd(num :float, N :int)->float:
@@ -67,7 +67,7 @@ def load_adjacency(filename):
             if 'Graph' in lines[i]:
                 lines[i] = 'G'+lines[i][lines[i].index(' ')+1:lines[i].index(',')]
                 if i != 0:
-                    G.append(iGph.Adjacency(np.array(A)))
+                    G.append(iGph.Adjacency(np.array(A), mode = 'undirected'))
                     A = []
             else:
                 lines[i] = lines[i][0:lines[i].index('\n')]
