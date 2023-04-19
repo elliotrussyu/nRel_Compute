@@ -135,11 +135,14 @@ if __name__ == '__main__':
     
     print_flag = 1
     recurr_flag = 0
+    
+    if args.interactive or args.file == '':
+        print('-- No valid filename detected, automatically entering the interactive mode.--\n')
+        print(ProgInitTXT)
+    
     while 1:
         if args.interactive or args.file == '':
-            recurr_flag = 1
-            print('-- No valid filename detected, automatically entering the interactive mode.--\n')
-            print(ProgInitTXT)
+            recurr_flag = 1       
             fname = input('\nPlease provide the file contains the graph set below. (Type exit to exit the program)\n File:  ')
             if fname == 'exit':
                 break
