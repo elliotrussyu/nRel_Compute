@@ -30,7 +30,7 @@ class GraphClass():
         self.Gset = load_adjacency(fname)
         self.size = len(self.Gset)
         self.Gcoeff = tuple([nRelpoly(g) for g in self.Gset])
-        self.Gpoly = tuple([coeff_to_poly(co) for co in self.Gcoeff])
+        self.Gpoly = tuple([coeff2nppoly(co) for co in self.Gcoeff])
         
     
     def analysis(self, specify = 'all',rec = False, sh_report = False, interact = False, sample = True):
@@ -86,8 +86,8 @@ class GraphClass():
         plt.show()
 
 
-def coeff_to_poly(coeff, pltpoly = False, x=np.linspace(0,1,101), plt_arg = None):
-    poly1 = np.poly1d(coeff)
+def coeff2nppoly(coeff, pltpoly = False, x=np.linspace(0,1,101), plt_arg = None):
+    poly1 = np.poly1d(coeff,variable='p')
     if pltpoly:
         plt.plot(x,poly1(x))
     
@@ -271,3 +271,13 @@ def CMC(H,rounds = 1e5,probability_seq = np.linspace(0,1,21),prec = 4):
     result = list(map(eval_p,[G]*len(probability_seq),probability_seq,it.repeat(N),it.repeat(kappa),it.repeat(rounds)))
     # print(result)
     return np.array([rnd(i/rounds,prec) for i in result])
+
+
+def quickplot(H,rtn = False):
+    fig , ax1 = plt.subplots()
+    ig.plot(H,target = ax1, vertex_color = "red", vertex_size = 15)
+    plt.grid(False)
+    plt.axis('off')
+    plt.show()
+    if rtn:
+        return fig,ax1

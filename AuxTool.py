@@ -72,6 +72,7 @@ def load_adjacency(filename):
             else:
                 lines[i] = lines[i][0:lines[i].index('\n')]
                 A.append(list(map(int,lines[i].split(' '))))
-        G.append(iGph.Adjacency(np.array(A)))
+        G.append(iGph.Adjacency(np.array(A), mode = 'undirected'))
 
     return tuple(G)
+
